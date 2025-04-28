@@ -18,15 +18,21 @@ const useDataProvider = () => {
         }
     }
     const getOne = async (resource: string, params?: any) => {
-        const request = {
-            method: 'GET',
-            url: `${import.meta.env.VITE_API_URL}/${resource}/${params.id}`,
-        }
+        try {
+            const response = await axios({
+                method: 'GET',
+                url: `${import.meta.env.VITE_API_URL}/${resource}/${params.id}`,
+            })
 
-        const response = await axios({ ...request });
-
-        return {
-            data: response.data
+            return {
+                data: response.data
+            }
+        } catch (error) {
+            console.log(error);
+            if (axios.isAxiosError(error) && error.response) {
+                toast.error(error.response.data.message || 'Error occurred');
+            }
+            throw error;
         }
     }
     const create = async (resource: string, params?: any) => {
@@ -43,8 +49,8 @@ const useDataProvider = () => {
                 data: response.data
             }
         } catch (error) {
-            if (axios.isAxiosError(error) && error.response?.status === 400) {
-                toast.error(error.response.data || 'Bad request');
+            if (axios.isAxiosError(error) && error.response) {
+                toast.error(error.response.data.message || 'Error occurred');
             }
             throw error;
         }
